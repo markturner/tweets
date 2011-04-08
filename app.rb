@@ -8,11 +8,11 @@ require 'open-uri'
 require 'json'
 
 configure do
-  # set username
-  user = 'markturner'
+  # set user id (you can get yours here: http://www.idfromuser.com/)
+  user = '552273'
   
   # feed url
-  url = "http://feeds.pinboard.in/rss/u:#{user}/"
+  url = "https://twitter.com/statuses/user_timeline/#{user}.rss/"
   
   # get the feed
   @@feed = open(url)
@@ -26,18 +26,23 @@ get '/' do
   # use Hpricot to parse the feed
   doc = Hpricot.parse(@@feed)
   
-  # examine first 5 items (0..4)
-  (doc/:item)[0..4].each do |item|
+  (doc/:item).each do |item|
     
-    # push items to array
-    array << {
-      :title => item.search("/title").inner_html,
-      # had to use the rdf:about attribute for link because hpricot thinks link is a malformed tag!
-      :url => item.attributes['rdf:about']
-    }
+    text = item.search("/title").inner_html
+    
+    # filter out replies and RTs
+    unless text.include?("@")
+      
+      # push items to array
+      array << {
+        :title => text.sub("markturner: ", "").sub("\n\n", ""),
+        # had to use the rdf:about attribute for link because hpricot thinks link is a malformed tag!
+        :url => item.search("/guid").inner_html
+      }
+    end
   end
   
-  # return array as json object
-  array.to_json
+  # return first 5 items of array as json object
+  array[0..4].to_json
 
 end

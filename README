@@ -1,0 +1,7 @@
+------------
+Tweet Getter 
+------------
+
+This is a lightweight ruby app, using sinatra, that returns a json feed of my 5 most recent tweets, which are neither @-replies or retweets.
+
+Feel free to steal it and do with it what you wish.
