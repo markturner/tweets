@@ -3,7 +3,7 @@ require 'bundler'
 Bundler.setup
 
 require 'sinatra'
-require 'hpricot'
+require 'nokogiri'
 require 'open-uri'
 require 'json'
 
@@ -19,24 +19,25 @@ configure do
 end
 
 get '/' do
+  content_type 'application/json', :charset => 'utf-8'
   headers['Cache-Control'] = 'public, max-age=21600' # Cache for six hours
   
   array = []
   
-  # use Hpricot to parse the feed
-  doc = Hpricot.parse(@@feed)
+  # use Nokogiri to parse the feed
+  doc = Nokogiri::XML(@@feed)
   
-  (doc/:item).each do |item|
+  doc.search("item").each do |item|
     
-    text = item.search("/title").inner_html
+    text = item.search("title").inner_html.sub("markturner: ", "")
     
     # filter out replies and RTs
-    unless text.include?("@")
+    unless text[0] == '@'
       
       # push items to array
       array << {
-        :title => text.sub("markturner: ", ""),
-        :url => item.search("/guid").inner_html
+        :title => text,
+        :url => item.search("link").inner_html
       }
     end
   end
