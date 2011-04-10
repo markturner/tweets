@@ -35,8 +35,7 @@ get '/' do
       
       # push items to array
       array << {
-        :title => text.sub("markturner: ", "").sub("\n\n", ""),
-        # had to use the rdf:about attribute for link because hpricot thinks link is a malformed tag!
+        :title => text.sub("markturner: ", ""),
         :url => item.search("/guid").inner_html
       }
     end
